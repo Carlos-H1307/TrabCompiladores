@@ -1,0 +1,14 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PLY generated parser tables
+parsetab.py
+lextab.py
+parser.out
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
