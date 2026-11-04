@@ -14,15 +14,44 @@
 
 import math
 import sys
+import turtle
 import ply.lex as lex
 import ply.yacc as yacc
+
+# Mapeamento de cores em português para inglês (para o Turtle)
+CORES_MAP = {
+    'PRETO': 'black',
+    'AZUL': 'blue',
+    'VERMELHO': 'red',
+    'VERDE': 'green',
+    'AMARELO': 'yellow',
+    'LARANJA': 'orange',
+    'ROXO': 'purple',
+    'BRANCO': 'white',
+    'CINZA': 'gray',
+}
 
 # =============================================================================
 # ESTADO DO ROBÔ VIRTUAL (Código de Usuário / Ambiente Semântico)
 # =============================================================================
 class RoboVirtual:
     def __init__(self):
+        self.tela_inicializada = False
+        self.t = None
         self.reset()
+
+    def _garantir_janela(self):
+        """Inicializa a janela gráfica do turtle apenas quando necessário"""
+        if not self.tela_inicializada:
+            try:
+                turtle.setup(width=800, height=600)
+                turtle.title("Visualizador Gráfico - Robô Virtual (DSL)")
+                self.t = turtle.Turtle()
+                self.t.shape("turtle")
+                self.t.speed(3)
+                self.tela_inicializada = True
+            except Exception:
+                self.t = None
 
     def reset(self):
         self.x = 0.0
@@ -32,9 +61,20 @@ class RoboVirtual:
         self.cor = "PRETO"
         self.trilha = [(0.0, 0.0)]
         self.variaveis = {}
+        
+        self._garantir_janela()
+        if self.t:
+            self.t.reset()
+            self.t.shape("turtle")
+            self.t.speed(3)
+            self.t.setheading(90)
+            self.t.color("black")
+            self.t.pendown()
+
         print("[Robô] Inicializado na posição (0.00, 0.00), ângulo 90° (Norte), caneta ABAIXADA.")
 
     def mover(self, distancia):
+        self._garantir_janela()
         rad = math.radians(self.angulo)
         novo_x = self.x + distancia * math.cos(rad)
         novo_y = self.y + distancia * math.sin(rad)
@@ -42,14 +82,51 @@ class RoboVirtual:
         status_desenho = f"desenhando com cor {self.cor}" if self.caneta_abaixada else "sem desenhar"
         print(f"[Robô] Moveu {distancia:.2f} unidades de ({self.x:.2f}, {self.y:.2f}) para ({novo_x:.2f}, {novo_y:.2f}) [{status_desenho}].")
         
+        if self.t:
+            if distancia >= 0:
+                self.t.forward(distancia)
+            else:
+                self.t.backward(abs(distancia))
+
         self.x = novo_x
         self.y = novo_y
         if self.caneta_abaixada:
             self.trilha.append((self.x, self.y))
 
     def girar(self, angulo_graus):
+        self._garantir_janela()
         self.angulo = (self.angulo + angulo_graus) % 360.0
         print(f"[Robô] Girou {angulo_graus:.2f}°. Novo ângulo: {self.angulo:.2f}°.")
+        if self.t:
+            if angulo_graus >= 0:
+                self.t.left(angulo_graus)
+            else:
+                self.t.right(abs(angulo_graus))
+
+    def levantar_caneta(self):
+        self._garantir_janela()
+        self.caneta_abaixada = False
+        if self.t:
+            self.t.penup()
+        print("[Robô] Caneta LEVANTADA (movimentos sem desenhar).")
+
+    def abaixar_caneta(self):
+        self._garantir_janela()
+        self.caneta_abaixada = True
+        if self.t:
+            self.t.pendown()
+        print("[Robô] Caneta ABAIXADA (desenhando).")
+
+    def mudar_cor(self, nova_cor):
+        self._garantir_janela()
+        self.cor = str(nova_cor).upper()
+        cor_ingles = CORES_MAP.get(self.cor, self.cor.lower())
+        if self.t:
+            try:
+                self.t.color(cor_ingles)
+            except Exception:
+                pass
+        print(f"[Robô] Cor alterada para: {self.cor}")
 
     def status(self):
         estado_caneta = "ABAIXADA (desenhando)" if self.caneta_abaixada else "LEVANTADA (livre)"
@@ -205,23 +282,19 @@ def p_statement_right(p):
 
 def p_statement_penup(p):
     '''statement : PENUP SEMI'''
-    robo.caneta_abaixada = False
-    print("[Robô] Caneta LEVANTADA (movimentos sem desenhar).")
+    robo.levantar_caneta()
     p[0] = ('penup',)
 
 def p_statement_pendown(p):
     '''statement : PENDOWN SEMI'''
-    robo.caneta_abaixada = True
-    print("[Robô] Caneta ABAIXADA (desenhando).")
+    robo.abaixar_caneta()
     p[0] = ('pendown',)
 
 def p_statement_color(p):
     '''statement : COLOR STRING SEMI
                  | COLOR NAME SEMI'''
-    nova_cor = str(p[2]).upper()
-    robo.cor = nova_cor
-    print(f"[Robô] Cor alterada para: {nova_cor}")
-    p[0] = ('color', nova_cor)
+    robo.mudar_cor(p[2])
+    p[0] = ('color', str(p[2]).upper())
 
 def p_statement_status(p):
     '''statement : STATUS SEMI'''
@@ -268,11 +341,11 @@ def _executar_comando_ast(cmd):
     elif tipo == 'right':
         robo.girar(-cmd[1])
     elif tipo == 'penup':
-        robo.caneta_abaixada = False
+        robo.levantar_caneta()
     elif tipo == 'pendown':
-        robo.caneta_abaixada = True
+        robo.abaixar_caneta()
     elif tipo == 'color':
-        robo.cor = cmd[1]
+        robo.mudar_cor(cmd[1])
     elif tipo == 'print':
         print(f"[Saída PRINT]: {cmd[1]}")
 
@@ -349,6 +422,14 @@ if __name__ == '__main__':
         with open(caminho_arquivo, 'r', encoding='utf-8') as f:
             conteudo = f.read()
         executar_codigo(conteudo)
+        
+        # Mantém a janela gráfica aberta até o usuário clicar nela ou fechar
+        if robo.tela_inicializada:
+            print("\n[Visualização Gráfica] Desenho concluído! Clique na janela para fechar.")
+            try:
+                turtle.done()
+            except Exception:
+                pass
     else:
         # Modo interativo (REPL)
         print("DSL do Robô Virtual (Digite 'sair' ou Ctrl+C para encerrar)")
