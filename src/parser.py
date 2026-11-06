@@ -112,11 +112,23 @@ def p_command_statement(p):
         p[0] = {'type': 'command', 'action': 'stop'}
 
 # Sequência de texto com suporte a palavras e tags de formatação
+def _juntar_texto(anterior, novo):
+    """Junta dois pedaços de texto decidindo se entre eles vai espaço.
+    O lexer descarta espaços, então reconstruímos: sem espaço antes de pontuação
+    ou de tag de fechamento, e sem espaço logo depois de uma tag de abertura."""
+    if novo.startswith("</") or novo[:1] in ",.;:!?…)":
+        return anterior + novo
+    if anterior.endswith(">") and not anterior.endswith("/>"):
+        ini = anterior.rfind("<")
+        if ini != -1 and not anterior[ini + 1:].startswith("/"):
+            return anterior + novo
+    return anterior + " " + novo
+
 def p_text_sequence(p):
     '''text_sequence : text_sequence text_item
                      | text_item'''
     if len(p) == 3:
-        p[0] = p[1] + " " + p[2]
+        p[0] = _juntar_texto(p[1], p[2])
     else:
         p[0] = p[1]
 
@@ -215,23 +227,27 @@ def compilar_para_xml(ast, arquivo_saida="dialogos.xml"):
         f.write(pretty_xml)
     print(f"[Compilador] XML gerado com sucesso: '{arquivo_saida}'")
 
-    # Exporta também para visual/dialogos.js para que o index.html leia o script compilado automaticamente
-    try:
-        dados_json = {}
-        for node in ast['nodes']:
-            speaker = node['lines'][0]['speaker'] if node['lines'] else "Narrador"
-            text_content = "\n".join([line['text'] for line in node['lines']])
-            dados_json[node['id']] = {
-                'speaker': speaker,
-                'text': text_content,
-                'choices': [{'speaker': ch['speaker'], 'text': ch['text'], 'target': ch['target']} for ch in node['choices']],
-                'target': node['jump']
-            }
-        with open("visual/dialogos.js", "w", encoding="utf-8") as f_js:
-            f_js.write("const roteiroJogo = " + json.dumps(dados_json, indent=4, ensure_ascii=False) + ";\n")
-        print("[Compilador] Arquivo visual atualizado com sucesso: 'visual/dialogos.js'")
-    except Exception as e:
-        pass
+def servir_visual(porta=8000):
+    """Sobe um servidor HTTP local na raiz do projeto e abre a interface visual.
+    A interface (visual/index.html) lê src/saida_dialogos.xml em tempo de execução."""
+    import functools
+    import http.server
+    import os
+    import socketserver
+    import webbrowser
+
+    raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=raiz)
+    socketserver.TCPServer.allow_reuse_address = True
+    with socketserver.TCPServer(("127.0.0.1", porta), handler) as httpd:
+        url = f"http://127.0.0.1:{porta}/visual/index.html"
+        print(f"\n[Visual] Servindo em {url}  (Ctrl+C para encerrar)")
+        print("[Visual] Edite o roteiro, recompile e clique em 'Reiniciar diálogo': o XML é relido.")
+        webbrowser.open(url)
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            print("\n[Visual] Servidor encerrado.")
 
 def executar_jogo_terminal(ast):
     """Executa o roteiro interativo diretamente no terminal para demonstração"""
@@ -282,7 +298,11 @@ def executar_jogo_terminal(ast):
     print("\n================== FIM DO DIÁLOGO ==================\n")
 
 if __name__ == '__main__':
-    caminho_entrada = sys.argv[1] if len(sys.argv) > 1 else 'roteiro.dialogo'
+    import os
+    pasta_src = os.path.dirname(os.path.abspath(__file__))
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    flags = [a for a in sys.argv[1:] if a.startswith('--')]
+    caminho_entrada = args[0] if args else os.path.join(pasta_src, 'roteiro.dialogo')
     with open(caminho_entrada, 'r', encoding='utf-8') as f:
         conteudo = f.read()
 
@@ -292,9 +312,12 @@ if __name__ == '__main__':
     if ast:
         valido = validar_semantica(ast)
         if valido:
-            compilar_para_xml(ast, "saida_dialogos.xml")
-            if len(sys.argv) > 2 and sys.argv[2] == '--jogar':
+            # O XML sempre fica em src/, onde a interface visual o procura
+            compilar_para_xml(ast, os.path.join(pasta_src, "saida_dialogos.xml"))
+            if '--jogar' in flags:
                 executar_jogo_terminal(ast)
+            elif '--visual' in flags:
+                servir_visual()
             else:
-                print("\nPara jogar interativamente no terminal, execute:")
-                print(f"python parser.py {caminho_entrada} --jogar")
+                print("\nPara jogar no terminal:  python parser.py roteiro.dialogo --jogar")
+                print("Para abrir a interface visual:  python parser.py roteiro.dialogo --visual")

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<conversation>
+	<dialog id="001" speaker="Rato">
+		<text>Ei, Cachorro... Está procurando &lt;shake&gt;&lt;color=#d6d6d6&gt;algo&lt;/color&gt;&lt;/shake&gt;?</text>
+		<choices>
+			<choice target="002" speaker="Cachorro">
+				<text>Sim, sim. Minha &lt;color=#f00&gt;Pochete&lt;/color&gt;.</text>
+			</choice>
+			<choice target="exit">
+				<text>Por enquanto, não.</text>
+			</choice>
+		</choices>
+	</dialog>
+	<dialog id="002" speaker="Rato" target="003">
+		<text>Um Cachorro? De Pochete?</text>
+	</dialog>
+	<dialog id="003" speaker="Rato" target="004">
+		<text>Estranho.</text>
+	</dialog>
+	<dialog id="004" speaker="Rato" target="005">
+		<text>Enfim...</text>
+	</dialog>
+	<dialog id="005" speaker="Rato">
+		<text>Eu vi um &lt;b&gt;Gato &lt;bobbing&gt;suspeito&lt;/bobbing&gt;&lt;/b&gt; passando com algo bem de baixo do &lt;color=#10c8e0&gt;SUBACO&lt;/color&gt;, agorinha pouco.
+Ele desceu. Acho que pode estar com o que você procura.</text>
+		<choices>
+			<choice target="006" speaker="Dogpoch">
+				<text>Humm... Vou dar uma olhada. Valeu, Rato!</text>
+			</choice>
+		</choices>
+	</dialog>
+	<dialog id="006" speaker="Rato" target="exit">
+		<text>De nada.</text>
+	</dialog>
+</conversation>

@@ -1,8 +1,8 @@
 // Roteiro oficial de teste para o compilador DialogueDSL
 phrase: 001
 ---
-[Rato Mafioso] Ei, Cachorro... Está procurando [shake][color=#d6d6d6]algo[/color][/shake]?
--> [Dogpoch] Sim, sim. Minha [color=#f00]Pochete[/color].
+[Rato] Ei, Cachorro... Está procurando [shake][color=#d6d6d6]algo[/color][/shake]?
+-> [Cachorro] Sim, sim. Minha [color=#f00]Pochete[/color].
     <<jump 002>>
 -> Por enquanto, não.
     <<stop>>
@@ -10,39 +10,32 @@ phrase: 001
 
 phrase: 002
 ---
-[Rato Mafioso] Um Cachorro? De Pochete?
+[Rato] Um Cachorro? De Pochete?
 <<jump 003>>
 ===
 
 phrase: 003
 ---
-[Rato Mafioso] Estranho.
+[Rato] Estranho.
 <<jump 004>>
 ===
 
 phrase: 004
 ---
-[Rato Mafioso] Enfim...
+[Rato] Enfim...
 <<jump 005>>
 ===
 
 phrase: 005
 ---
-[Rato Mafioso] Eu vi um [b]Gato [bobbing]suspeito[/bobbing][/b] passando com algo bem de baixo do [color=#10c8e0]SUBACO[/color], agorinha pouco.
-[Rato Mafioso] Ele desceu. Acho que pode estar com o que você procura.
--> [Dogpoch] Humm... Vou dar uma olhada. Valeu, Rato Mafioso!
+[Rato] Eu vi um [b]Gato [bobbing]suspeito[/bobbing][/b] passando com algo bem de baixo do [color=#10c8e0]SUBACO[/color], agorinha pouco.
+[Rato] Ele desceu. Acho que pode estar com o que você procura.
+-> [Dogpoch] Humm... Vou dar uma olhada. Valeu, Rato!
     <<jump 006>>
 ===
 
 phrase: 006
 ---
-[Rato Mafioso] De nada, Patron.
-<<jump 007>>
-===
-
-phrase: 007
----
-[Rato Mafioso] Faz o [color=#f00]L[/color]!!!!
+[Rato] De nada.
 <<stop>>
 ===
-
