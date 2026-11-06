@@ -1,0 +1,139 @@
+// Roteiro de teste: "A Pena Dourada" - personagens ficticios, todos passaros
+//
+// Elenco
+//   Plumo        - o pombo (personagem do jogador)
+//   Pipo         - o pardal assustado e falante
+//   Dona Jandira - a coruja sabia e sonolenta
+//   Tico         - o tucano vaidoso
+//   Nina         - a beija flor veloz
+//
+// Efeitos usados: [shake] [bobbing] [b] [color=#hex] e [pause=ms/]
+// Observacao: tags de abertura devem vir coladas na palavra seguinte, sem espaco.
+
+phrase: inicio
+---
+[Pipo] Pio pio pio! [shake]Plumo, Plumo, uma tragédia![/shake]
+[Pipo] A [color=#ffd700]Pena Dourada[/color] do Festival do Vento [b]sumiu[/b] do ninho!
+-> [Plumo] Calma, Pipo. Conte tudo desde o começo.
+    <<jump pipo_conta>>
+-> [Plumo] Eu não tenho tempo para isso agora.
+    <<jump recusa>>
+===
+
+phrase: recusa
+---
+[Pipo] [shake]Mas sem a Pena Dourada o vento não vai soprar![/shake]
+[Pipo] Sem vento, nenhum pássaro consegue voar... [pause=700/]Por favor, Plumo.
+-> [Plumo] Está bem, eu ajudo.
+    <<jump pipo_conta>>
+-> [Plumo] Procure outra ave.
+    <<jump final_egoista>>
+===
+
+phrase: pipo_conta
+---
+[Pipo] Eu estava dormindo quando ouvi um [bobbing]ssssshhh[/bobbing] vindo da árvore velha.
+[Pipo] [pause=700/]Quando acordei, só restava uma [color=#999999]sombra[/color] no galho. Corra até a Dona Jandira, ela vê tudo!
+<<jump pistas>>
+===
+
+phrase: pistas
+---
+[Dona Jandira] Hou hou... [pause=600/]Eu vi tudo, filhote.
+[Dona Jandira] Sou a [b]Dona Jandira[/b], guardiã das noites, e meus olhos [color=#f5d742]brilham[/color] no escuro.
+-> [Plumo] Quem levou a Pena Dourada?
+    <<jump suspeito>>
+-> [Plumo] Pode me mostrar o caminho?
+    <<jump caminho>>
+===
+
+phrase: suspeito
+---
+[Dona Jandira] Foi alguém [bobbing]muito[/bobbing] colorido e [b]muito[/b] barulhento.
+[Dona Jandira] Um certo [color=#ff7a00]Tico[/color], o tucano exibido, que vive dizendo que tem o [shake]maior bico[/shake] do bosque.
+<<jump tico>>
+===
+
+phrase: caminho
+---
+[Dona Jandira] Siga o riacho até a figueira gigante. [pause=500/]Mas cuidado, o caminho é [shake]escorregadio[/shake]!
+[Dona Jandira] Lá você vai encontrar o ladrão da pena.
+<<jump tico>>
+===
+
+phrase: tico
+---
+[Tico] Ah ah ah! [b]QUEM OUSA[/b] me procurar?
+[Tico] Eu sou o [color=#ff7a00]Grande Tico[/color], o bico mais [bobbing]lindo[/bobbing] do bosque!
+-> [Plumo] Devolva a Pena Dourada, Tico.
+    <<jump tico_nega>>
+-> [Plumo] Que bico lindo... Posso ver de perto?
+    <<jump tico_vaidoso>>
+===
+
+phrase: tico_nega
+---
+[Tico] [shake]Nunca![/shake] A pena combina perfeitamente com o meu [color=#ff7a00]bico laranja[/color]!
+-> [Plumo] Sem ela o vento não sopra, e você não vai poder voar!
+    <<jump tico_assusta>>
+-> [Plumo] Então eu mesmo a tomo de você!
+    <<jump briga>>
+===
+
+phrase: tico_vaidoso
+---
+[Tico] [bobbing]Haha![/bobbing] Finalmente alguém com bom gosto!
+[Tico] Olhe bem, é o bico mais [color=#ff7a00]radiante[/color] de todos. [pause=500/]Vou admirar o meu reflexo no riacho.
+<<jump nina>>
+===
+
+phrase: nina
+---
+[Nina] [b]Zum zum![/b] Enquanto o Tico se admira no riacho, eu [bobbing]voo[/bobbing] rapidinho até o galho dele.
+[Nina] Quer que eu pegue a [color=#ffd700]Pena Dourada[/color] sem ele perceber?
+-> [Plumo] Rápido, Nina, pegue a pena!
+    <<jump final_astucia>>
+-> [Plumo] Não, vou tentar convencer o Tico.
+    <<jump tico_nega>>
+===
+
+phrase: tico_assusta
+---
+[Tico] [pause=600/]Como assim... [shake]sem voar?[/shake]
+[Tico] Eu [b]preciso[/b] voar para exibir o meu bico lá do alto! Está bem, está bem... leve a pena.
+<<jump final_bom>>
+===
+
+phrase: briga
+---
+[Tico] [shake]Então venha![/shake] [pause=800/]Ai! Ai! [b]Meu bico![/b]
+[Tico] Eu me rendo, eu me rendo! Leve essa [color=#ffd700]pena[/color] chata!
+<<jump final_briga>>
+===
+
+phrase: final_bom
+---
+[Pipo] [bobbing]Piooo![/bobbing] Você conseguiu, Plumo!
+[Pipo] A [color=#ffd700]Pena Dourada[/color] brilha de novo e o vento já está [b]soprando[/b]! Que o festival comece!
+<<stop>>
+===
+
+phrase: final_astucia
+---
+[Nina] Zum zum! Missão cumprida! [pause=500/]O Tico nem percebeu que a [color=#ffd700]Pena Dourada[/color] sumiu do galho dele.
+[Nina] [bobbing]Esperteza voa mais alto que força![/bobbing]
+<<stop>>
+===
+
+phrase: final_briga
+---
+[Dona Jandira] Hou hou... Força demais, bondade de menos. [pause=600/]A pena voltou, mas o bico do Tico vai [shake]doer[/shake] por semanas.
+<<stop>>
+===
+
+phrase: final_egoista
+---
+[Pipo] [pause=800/]Entendo... [color=#666666]Então eu procuro sozinho.[/color]
+[Pipo] Pio... [pause=600/]pio... [shake]E o vento nunca mais soprou.[/shake]
+<<stop>>
+===

@@ -2,9 +2,9 @@
 phrase: 001
 ---
 [Rato] Ei, Cachorro... Está procurando [shake][color=#d6d6d6]algo[/color][/shake]?
--> [Cachorro] Sim, sim. Minha [color=#f00]Pochete[/color].
+-> [Cachorro] Sim, sim. Minha [shake][color=#f00]Pochete[/color][/shake].
     <<jump 002>>
--> Por enquanto, não.
+-> [Cachorro] Por enquanto, não.
     <<stop>>
 ===
 

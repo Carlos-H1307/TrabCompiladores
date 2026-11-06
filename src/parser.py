@@ -8,7 +8,44 @@ import json
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as minidom
 from ply import yacc
-from lexer import tokens
+from lexer import tokens, lexer
+
+# =============================================================================
+# REGISTRO DE ERROS DE COMPILAÇÃO
+# Os erros são acumulados (com linha e trecho do código) e, se houver algum,
+# o compilador falha e NÃO gera o XML.
+# =============================================================================
+class ErroCompilacao(Exception):
+    """Erro fatal que interrompe a análise sintática."""
+
+erros = []            # lista de dicts: {'tipo', 'linha', 'msg', 'dica'}
+_fonte_linhas = []    # linhas do roteiro, usadas para mostrar o trecho com erro
+
+def definir_fonte(texto):
+    """Guarda o roteiro e zera o estado de erros antes de uma nova compilação."""
+    global _fonte_linhas
+    _fonte_linhas = texto.splitlines()
+    erros.clear()
+    lexer.lineno = 1
+
+def registrar_erro(tipo, linha, msg, dica=None):
+    erros.append({'tipo': tipo, 'linha': linha, 'msg': msg, 'dica': dica})
+
+def imprimir_erros(arquivo):
+    """Mostra cada erro com o arquivo, a linha e o trecho do roteiro."""
+    for e in erros:
+        print(f"\n[{e['tipo']}] {arquivo}, linha {e['linha']}: {e['msg']}")
+        if 1 <= e['linha'] <= len(_fonte_linhas):
+            print(f"    {e['linha']:>4} | {_fonte_linhas[e['linha'] - 1].rstrip()}")
+        if e['dica']:
+            print(f"    Dica: {e['dica']}")
+    print(f"\nCompilação interrompida: {len(erros)} erro(s). Nenhum XML foi gerado.")
+
+class Texto(str):
+    """Texto de uma frase que lembra em quais linhas do roteiro ele começa e termina.
+    Serve para detectar uma frase escrita sem o identificador do personagem."""
+    linha_ini = 0
+    linha_fim = 0
 
 # =============================================================================
 # ESTRUTURAÇÃO DA GRAMÁTICA SINTÁTICA (Regras de Produção LALR)
@@ -81,24 +118,34 @@ def p_dialogue_line(p):
         'text': p[2]
     }
 
-# Escolha interativa com comando aninhado
+# Escolha interativa: TODA opção deve começar com o identificador do personagem
+#     -> [Personagem] texto da opção
+#        <<jump destino>>
 def p_choice_statement(p):
-    '''choice_statement : ARROW SPEAKER text_sequence command_statement
-                         | ARROW text_sequence command_statement'''
-    if len(p) == 5:
-        speaker = p[2]
-        text = p[3]
-        cmd = p[4]
-    else:
-        speaker = None
-        text = p[2]
-        cmd = p[3]
-
+    '''choice_statement : ARROW SPEAKER text_sequence command_statement'''
+    cmd = p[4]
     target = cmd['target'] if cmd['action'] == 'jump' else 'exit'
     p[0] = {
         'type': 'choice',
-        'speaker': speaker,
-        'text': text,
+        'speaker': p[2],
+        'text': str(p[3]),
+        'target': target
+    }
+
+# Opção SEM identificador: continua sendo reconhecida pela gramática apenas para
+# podermos apontar a linha exata do erro; o compilador falha ao final da análise.
+def p_choice_statement_sem_falante(p):
+    '''choice_statement : ARROW text_sequence command_statement'''
+    registrar_erro(
+        'Erro Semântico', p.lineno(1),
+        f'a opção "{p[2]}" não tem o identificador do personagem.',
+        'toda opção deve ser escrita como  -> [Personagem] texto da opção')
+    cmd = p[3]
+    target = cmd['target'] if cmd['action'] == 'jump' else 'exit'
+    p[0] = {
+        'type': 'choice',
+        'speaker': None,
+        'text': str(p[2]),
         'target': target
     }
 
@@ -128,7 +175,16 @@ def p_text_sequence(p):
     '''text_sequence : text_sequence text_item
                      | text_item'''
     if len(p) == 3:
-        p[0] = _juntar_texto(p[1], p[2])
+        # Uma frase que continua em outra linha do roteiro não tem identificador de personagem
+        if p[2].linha_ini > p[1].linha_fim:
+            registrar_erro(
+                'Erro Semântico', p[2].linha_ini,
+                'frase sem o identificador do personagem.',
+                'toda frase deve começar com [Personagem]; para continuar a fala, repita o identificador')
+        novo = Texto(_juntar_texto(p[1], p[2]))
+        novo.linha_ini = p[1].linha_ini
+        novo.linha_fim = p[2].linha_fim
+        p[0] = novo
     else:
         p[0] = p[1]
 
@@ -141,20 +197,32 @@ def p_text_item(p):
     val = p[1]
     # Se for markup, reconstrói a tag visual
     if p.slice[1].type == 'MARKUP_OPEN':
-        p[0] = f"<{val}>"
+        texto = f"<{val}>"
     elif p.slice[1].type == 'MARKUP_CLOSE':
         tag_nome = val if val else ""
-        p[0] = f"</{tag_nome}>"
+        texto = f"</{tag_nome}>"
     elif p.slice[1].type == 'MARKUP_SELF':
-        p[0] = f"<{val}/>"
+        texto = f"<{val}/>"
     else:
-        p[0] = str(val)
+        texto = str(val)
+    item = Texto(texto)
+    item.linha_ini = item.linha_fim = p.lineno(1)
+    p[0] = item
+
+_TIPOS_DE_TEXTO = ('TEXT', 'ID', 'MARKUP_OPEN', 'MARKUP_CLOSE', 'MARKUP_SELF')
 
 def p_error(p):
-    if p:
-        print(f"Erro Sintático próximo ao token '{p.value}' (tipo: {p.type}) na linha {p.lineno}")
+    if p is None:
+        registrar_erro('Erro Sintático', len(_fonte_linhas) or 1,
+                       'fim inesperado do arquivo.',
+                       'verifique se o último bloco termina com ===')
     else:
-        print("Erro Sintático: fim inesperado do arquivo (EOF).")
+        dica = None
+        if p.type in _TIPOS_DE_TEXTO:
+            dica = 'falta o identificador do personagem, [Personagem], antes desta frase?'
+        registrar_erro('Erro Sintático', p.lineno,
+                       f"token inesperado '{p.value}' (tipo {p.type}).", dica)
+    raise ErroCompilacao()
 
 parser = yacc.yacc()
 
@@ -307,17 +375,30 @@ if __name__ == '__main__':
         conteudo = f.read()
 
     print(f"Compilando roteiro '{caminho_entrada}'...")
-    ast = parser.parse(conteudo)
+    definir_fonte(conteudo)
+    ast = None
+    try:
+        ast = parser.parse(conteudo, lexer=lexer)
+    except ErroCompilacao:
+        pass
 
-    if ast:
-        valido = validar_semantica(ast)
-        if valido:
-            # O XML sempre fica em src/, onde a interface visual o procura
-            compilar_para_xml(ast, os.path.join(pasta_src, "saida_dialogos.xml"))
-            if '--jogar' in flags:
-                executar_jogo_terminal(ast)
-            elif '--visual' in flags:
-                servir_visual()
-            else:
-                print("\nPara jogar no terminal:  python parser.py roteiro.dialogo --jogar")
-                print("Para abrir a interface visual:  python parser.py roteiro.dialogo --visual")
+    # Qualquer erro registrado (sintático ou semântico) faz o compilador falhar
+    if erros or not ast:
+        if not erros:
+            registrar_erro('Erro Sintático', 1, 'o roteiro está vazio ou não pôde ser interpretado.')
+        imprimir_erros(os.path.basename(caminho_entrada))
+        sys.exit(1)
+
+    valido = validar_semantica(ast)
+    if not valido:
+        sys.exit(1)
+
+    # O XML sempre fica em src/, onde a interface visual o procura
+    compilar_para_xml(ast, os.path.join(pasta_src, "saida_dialogos.xml"))
+    if '--jogar' in flags:
+        executar_jogo_terminal(ast)
+    elif '--visual' in flags:
+        servir_visual()
+    else:
+        print("\nPara jogar no terminal:  python parser.py roteiro.dialogo --jogar")
+        print("Para abrir a interface visual:  python parser.py roteiro.dialogo --visual")

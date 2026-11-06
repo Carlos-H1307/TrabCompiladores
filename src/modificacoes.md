@@ -97,3 +97,115 @@ Arquivos alterados: [`visual/index.html`](file:///d:/Cefet/2026_2/Compiladores/t
 cd src
 python parser.py roteiro.dialogo --visual
 ```
+
+
+# Modificação 3
+A regra de ter o nome do personagem na frase da opção não está funcionando. quando não houver o identificador do personagem na frase da opção, o compilador deve falha e mostrar onde está o erro pois antes de toda frase deve ter o identificador do personagem.
+
+
+
+## Alterações realizadas
+
+Arquivos alterados: [`src/parser.py`](file:///d:/Cefet/2026_2/Compiladores/trabalho/src/parser.py) e [`src/roteiro.dialogo`](file:///d:/Cefet/2026_2/Compiladores/trabalho/src/roteiro.dialogo).
+
+### Problema
+A gramática aceitava duas formas de opção: `ARROW SPEAKER text_sequence` e `ARROW text_sequence`. Por causa da segunda, uma opção sem `[Personagem]` compilava normalmente (o falante ficava `None`). Além disso, como o lexer descarta quebras de linha, uma frase escrita sem personagem na linha seguinte era absorvida pela frase anterior, sem aviso.
+
+### 1. Identificador obrigatório na opção
+- `p_choice_statement` agora só aceita `-> [Personagem] texto` seguido de `<<jump>>` ou `<<stop>>`.
+- A forma sem personagem foi isolada em `p_choice_statement_sem_falante`, que existe apenas para apontar a linha exata do erro. Ao reconhecê-la, o compilador registra o erro e falha no final.
+
+### 2. Frase sem personagem em outra linha
+- Cada pedaço de texto agora guarda a linha em que começa e termina (classe `Texto`).
+- Em `p_text_sequence`, se um novo pedaço começa em uma linha posterior à do anterior, a frase continua sem o identificador. Isso é registrado como erro, com a linha correta.
+
+### 3. Falha com localização do erro
+- Os erros são acumulados em `erros` (função `registrar_erro`) com tipo, linha, mensagem e dica.
+- `imprimir_erros` mostra o arquivo, a linha, o trecho do roteiro e uma dica.
+- Se houver qualquer erro, o compilador termina com código de saída 1 e **não gera** o `saida_dialogos.xml` (antes ele podia gerar um XML incompleto).
+- `p_error` passou a registrar o erro e abortar a análise. Quando o erro é uma frase sem `[Personagem]`, a dica sugere esse motivo.
+- O estado de erros e o contador de linhas são zerados a cada compilação (`definir_fonte`).
+
+### 4. Roteiro de exemplo
+- Em `roteiro.dialogo`, a opção `-> Por enquanto, não.` passou a `-> [Cachorro] Por enquanto, não.`. Sem isso o próprio exemplo deixaria de compilar. O XML correspondente indica `speaker="Cachorro"` nessa opção.
+
+### Exemplos de saída
+
+Opção sem personagem:
+```text
+[Erro Semântico] roteiro.dialogo, linha 7: a opção "Por enquanto, não." não tem o identificador do personagem.
+       7 | -> Por enquanto, não.
+    Dica: toda opção deve ser escrita como  -> [Personagem] texto da opção
+
+Compilação interrompida: 1 erro(s). Nenhum XML foi gerado.
+```
+
+Frase sem personagem:
+```text
+[Erro Sintático] roteiro.dialogo, linha 3: token inesperado 'Oi' (tipo ID).
+       3 | Oi sem falante.
+    Dica: falta o identificador do personagem, [Personagem], antes desta frase?
+```
+
+Continuação sem personagem na linha seguinte:
+```text
+[Erro Semântico] roteiro.dialogo, linha 4: frase sem o identificador do personagem.
+       4 | Segunda linha sem falante.
+```
+
+### Limitação conhecida
+Caracteres inválidos para o lexer (por exemplo, hífen no meio do texto) ainda só imprimem um aviso léxico e a compilação continua.
+
+
+
+## Alterações realizadas
+
+Arquivos alterados: [`src/parser.py`](file:///d:/Cefet/2026_2/Compiladores/trabalho/src/parser.py) e [`src/roteiro.dialogo`](file:///d:/Cefet/2026_2/Compiladores/trabalho/src/roteiro.dialogo).
+
+### Problema
+A gramática aceitava duas formas de opção: `ARROW SPEAKER text_sequence` e `ARROW text_sequence`. Por causa da segunda, uma opção sem `[Personagem]` compilava normalmente (o falante ficava `None`). Além disso, como o lexer descarta quebras de linha, uma frase escrita sem personagem na linha seguinte era absorvida pela frase anterior, sem aviso.
+
+### 1. Identificador obrigatório na opção
+- `p_choice_statement` agora só aceita `-> [Personagem] texto` seguido de `<<jump>>` ou `<<stop>>`.
+- A forma sem personagem foi isolada em `p_choice_statement_sem_falante`, que existe apenas para apontar a linha exata do erro. Ao reconhecê-la, o compilador registra o erro e falha no final.
+
+### 2. Frase sem personagem em outra linha
+- Cada pedaço de texto agora guarda a linha em que começa e termina (classe `Texto`).
+- Em `p_text_sequence`, se um novo pedaço começa em uma linha posterior à do anterior, a frase continua sem o identificador. Isso é registrado como erro, com a linha correta.
+
+### 3. Falha com localização do erro
+- Os erros são acumulados em `erros` (função `registrar_erro`) com tipo, linha, mensagem e dica.
+- `imprimir_erros` mostra o arquivo, a linha, o trecho do roteiro e uma dica.
+- Se houver qualquer erro, o compilador termina com código de saída 1 e **não gera** o `saida_dialogos.xml` (antes ele podia gerar um XML incompleto).
+- `p_error` passou a registrar o erro e abortar a análise. Quando o erro é uma frase sem `[Personagem]`, a dica sugere esse motivo.
+- O estado de erros e o contador de linhas são zerados a cada compilação (`definir_fonte`).
+
+### 4. Roteiro de exemplo
+- Em `roteiro.dialogo`, a opção `-> Por enquanto, não.` passou a `-> [Cachorro] Por enquanto, não.`. Sem isso o próprio exemplo deixaria de compilar. O XML correspondente indica `speaker="Cachorro"` nessa opção.
+
+### Exemplos de saída
+
+Opção sem personagem:
+```text
+[Erro Semântico] roteiro.dialogo, linha 7: a opção "Por enquanto, não." não tem o identificador do personagem.
+       7 | -> Por enquanto, não.
+    Dica: toda opção deve ser escrita como  -> [Personagem] texto da opção
+
+Compilação interrompida: 1 erro(s). Nenhum XML foi gerado.
+```
+
+Frase sem personagem:
+```text
+[Erro Sintático] roteiro.dialogo, linha 3: token inesperado 'Oi' (tipo ID).
+       3 | Oi sem falante.
+    Dica: falta o identificador do personagem, [Personagem], antes desta frase?
+```
+
+Continuação sem personagem na linha seguinte:
+```text
+[Erro Semântico] roteiro.dialogo, linha 4: frase sem o identificador do personagem.
+       4 | Segunda linha sem falante.
+```
+
+### Limitação conhecida
+Caracteres inválidos para o lexer (por exemplo, hífen no meio do texto) ainda só imprimem um aviso léxico e a compilação continua.
