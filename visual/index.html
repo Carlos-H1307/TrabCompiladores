@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Diálogos - Jogo Digital</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: #0b0c10;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Cena Principal (Main Scene) */
+        #main-scene {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #1f2833 0%, #0b0c10 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Efeito de ambiente na cena principal */
+        .ambient-light {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(102, 252, 241, 0.08) 0%, transparent 70%);
+            animation: pulse 6s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .scene-title {
+            position: absolute;
+            top: 40px;
+            font-size: 1.1rem;
+            color: #45a29e;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        .game-status-msg {
+            font-size: 1.6rem;
+            color: #66fcf1;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(102, 252, 241, 0.4);
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        /* Contêiner de Gerenciamento de Diálogos */
+        #dialog-manager {
+            position: absolute;
+            bottom: 40px;
+            width: 85%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 10;
+            transition: all 0.5s ease;
+        }
+
+        /* Painel de Escolhas (Criado ACIMA do Dialog Frame) */
+        #choices-frame {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            animation: slideUp 0.3s ease-out;
+            align-self: flex-end;
+            width: 75%;
+            max-width: 650px;
+        }
+
+        .choice-btn {
+            background: rgba(15, 20, 25, 0.95);
+            border: 2px solid #45a29e;
+            color: #e0e0e0;
+            padding: 14px 22px;
+            font-size: 1.05rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+        }
+
+        .choice-btn:hover {
+            background: #1f2833;
+            border-color: #66fcf1;
+            color: #ffffff;
+            transform: translateX(-8px);
+            box-shadow: 0 0 15px rgba(102, 252, 241, 0.4);
+        }
+
+        .choice-speaker-tag {
+            color: #66fcf1;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* Caixinha do Nome do Falante (ACIMA do Dialog Frame) */
+        #speaker-badge {
+            align-self: flex-start;
+            background: #1f2833;
+            color: #66fcf1;
+            border: 2px solid #45a29e;
+            border-bottom: none;
+            padding: 8px 24px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(102, 252, 241, 0.5);
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: -2px;
+            z-index: 2;
+        }
+
+        /* Dialog Frame principal */
+        #dialog-frame {
+            background: rgba(11, 12, 16, 0.95);
+            border: 2px solid #45a29e;
+            border-radius: 0 12px 12px 12px;
+            padding: 26px 32px;
+            min-height: 140px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(69, 162, 158, 0.1);
+            position: relative;
+            cursor: pointer;
+        }
+
+        #dialog-frame:hover {
+            border-color: #66fcf1;
+        }
+
+        #dialog-text {
+            font-size: 1.35rem;
+            line-height: 1.7;
+            color: #f5f5f5;
+            min-height: 60px;
+            word-wrap: break-word;
+        }
+
+        /* Indicador de continuar diálogo */
+        .continue-prompt {
+            position: absolute;
+            right: 25px;
+            bottom: 15px;
+            font-size: 0.85rem;
+            color: #45a29e;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: bouncePrompt 1.2s infinite;
+        }
+
+        @keyframes bouncePrompt {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        /* =====================================================================
+           EFEITOS VISUAIS PARTICIONADOS EM TAGS
+           ===================================================================== */
+        
+        /* Efeito de tremor (shake / terremoto nas palavras) */
+        .fx-shake {
+            display: inline-block;
+            animation: fxShake 0.18s infinite ease-in-out;
+        }
+
+        @keyframes fxShake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-1px, -1px) rotate(-1deg); }
+            40% { transform: translate(-2px, 0px) rotate(1deg); }
+            60% { transform: translate(2px, 1px) rotate(0deg); }
+            80% { transform: translate(1px, -1px) rotate(1deg); }
+            100% { transform: translate(-1px, 1px) rotate(-1deg); }
+        }
+
+        /* Efeito de flutuação / balanço (bobbing / wave) */
+        .fx-bobbing {
+            display: inline-block;
+            animation: fxBobbing 1.4s infinite ease-in-out alternate;
+        }
+
+        @keyframes fxBobbing {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-5px); }
+        }
+
+        /* Efeito Negrito */
+        .fx-bold {
+            font-weight: 800;
+        }
+
+        /* Botão para reiniciar demonstração na Main Scene */
+        #restart-btn {
+            display: none;
+            margin-top: 25px;
+            padding: 12px 28px;
+            background: #1f2833;
+            border: 2px solid #66fcf1;
+            color: #66fcf1;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #restart-btn:hover {
+            background: #66fcf1;
+            color: #0b0c10;
+            box-shadow: 0 0 20px rgba(102, 252, 241, 0.6);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CENA MAIN -->
+    <div id="main-scene">
+        <div class="ambient-light"></div>
+        <div class="scene-title">Beco Escuro - Cidade dos Bichos</div>
+        
+        <div id="end-message-container" style="display:none; text-align:center; z-index: 5;">
+            <div class="game-status-msg">
+                Diálogo encerrado.<br>Você agora está livre para explorar a cena principal.
+            </div>
+            <button id="restart-btn" onclick="iniciarDialogos()">Reiniciar Diálogo</button>
+        </div>
+
+        <!-- DIALOG MANAGER (Gerenciador e Contêiner de Diálogos) -->
+        <div id="dialog-manager">
+            <!-- As opções de escolha serão criadas ACIMA do dialog frame -->
+            <div id="choices-frame" style="display: none;"></div>
+
+            <!-- Nome do Personagem ACIMA do Dialog Frame -->
+            <div id="speaker-badge">Rato Mafioso</div>
+
+            <!-- DIALOG FRAME (Onde o texto do diálogo é renderizado) -->
+            <div id="dialog-frame" onclick="dialogManager.avancar()">
+                <div id="dialog-text"></div>
+                <div class="continue-prompt" id="continue-hint">
+                    <span>Clique ou pressione ESPAÇO</span> ▶
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados gerados a partir do roteiro compilado (Yarn / XML)
+        const roteiroJogo = {
+            "001": {
+                speaker: "Rato Mafioso",
+                text: "Ei, Cachorro... Está procurando [shake][color=#d6d6d6]algo[/color][/shake]?",
+                choices: [
+                    { speaker: "Dogpoch", text: "Sim, sim. Minha [color=#f00]Pochete[/color].", target: "002" },
+                    { speaker: null, text: "Por enquanto, não.", target: "exit" }
+                ],
+                target: null
+            },
+            "002": {
+                speaker: "Rato Mafioso",
+                text: "Um Cachorro? De Pochete?",
+                choices: [],
+                target: "003"
+            },
+            "003": {
+                speaker: "Rato Mafioso",
+                text: "Estranho.",
+                choices: [],
+                target: "004"
+            },
+            "004": {
+                speaker: "Rato Mafioso",
+                text: "Enfim...",
+                choices: [],
+                target: "005"
+            },
+            "005": {
+                speaker: "Rato Mafioso",
+                text: "Eu vi um [b]Gato [bobbing]suspeito[/bobbing][/b] passando com algo bem de baixo do [color=#10c8e0]SUBACO[/color], agorinha pouco.\nEle desceu. Acho que pode estar com o que você procura.",
+                choices: [
+                    { speaker: "Dogpoch", text: "Humm... Vou dar uma olhada. Valeu, Rato Mafioso!", target: "006" }
+                ],
+                target: null
+            },
+            "006": {
+                speaker: "Rato Mafioso",
+                text: "De nada, Patron.",
+                choices: [],
+                target: "007"
+            },
+            "007": {
+                speaker: "Rato Mafioso",
+                text: "Faz o [color=#f00]L[/color]!!!!",
+                choices: [],
+                target: "exit"
+            }
+        };
+
+        /* =====================================================================
+           PROCESSADOR DE TAGS E MODIFICAÇÕES VISUAIS
+           Particiona o texto e converte tags em spans HTML estilizados
+           ===================================================================== */
+        function processarTagsVisuais(textoBruto) {
+            if (!textoBruto) return "";
+            
+            let html = textoBruto;
+
+            // Transforma quebras de linha em <br>
+            html = html.replace(/\n/g, '<br>');
+
+            // Tag de Negrito: [b]...[/b] ou <strong>...</strong>
+            html = html.replace(/\[b\](.*?)\[\/b\]/gi, '<span class="fx-bold">$1</span>');
+            html = html.replace(/<strong>(.*?)<\/strong>/gi, '<span class="fx-bold">$1</span>');
+
+            // Tag de Cor: [color=#hex]...[/color] ou <color=#hex>...</color>
+            html = html.replace(/\[color=([^\]]+)\](.*?)\[\/color\]/gi, '<span style="color: $1; text-shadow: 0 0 10px $1;">$2</span>');
+            html = html.replace(/<color=([^>]+)>(.*?)<\/color>/gi, '<span style="color: $1; text-shadow: 0 0 10px $1;">$2</span>');
+
+            // Tag de Tremor: [shake]...[/shake] ou <shake>...</shake>
+            html = html.replace(/\[shake\](.*?)\[\/shake\]/gi, '<span class="fx-shake">$1</span>');
+            html = html.replace(/<shake>(.*?)<\/shake>/gi, '<span class="fx-shake">$1</span>');
+
+            // Tag de Flutuação: [bobbing]...[/bobbing] ou <bobbing>...</bobbing>
+            html = html.replace(/\[bobbing\](.*?)\[\/bobbing\]/gi, '<span class="fx-bobbing">$1</span>');
+            html = html.replace(/<bobbing>(.*?)<\/bobbing>/gi, '<span class="fx-bobbing">$1</span>');
+
+            return html;
+        }
+
+        /* =====================================================================
+           DIALOG MANAGER (Gerenciador do Ciclo de Vida dos Diálogos)
+           ===================================================================== */
+        class DialogManager {
+            constructor(dialogos) {
+                this.dialogos = dialogos;
+                this.nodoAtualId = "001";
+                this.aguardandoEscolha = false;
+                
+                // Elementos da UI
+                this.managerEl = document.getElementById("dialog-manager");
+                this.speakerBadge = document.getElementById("speaker-badge");
+                this.dialogFrame = document.getElementById("dialog-frame");
+                this.dialogText = document.getElementById("dialog-text");
+                this.choicesFrame = document.getElementById("choices-frame");
+                this.continueHint = document.getElementById("continue-hint");
+                this.endMessage = document.getElementById("end-message-container");
+                this.restartBtn = document.getElementById("restart-btn");
+            }
+
+            iniciar() {
+                this.nodoAtualId = "001";
+                this.aguardandoEscolha = false;
+                
+                // Garante que o dialog manager está visível
+                this.managerEl.style.display = "flex";
+                this.managerEl.style.animation = "slideUp 0.4s ease-out";
+                this.endMessage.style.display = "none";
+                
+                this.carregarNodo(this.nodoAtualId);
+            }
+
+            carregarNodo(id) {
+                if (!id || id === "exit" || !this.dialogos[id]) {
+                    this.destruirDialogos();
+                    return;
+                }
+
+                const nodo = this.dialogos[id];
+                this.nodoAtualId = id;
+
+                // 1. Atualiza o Falante ACIMA do dialog_frame
+                this.speakerBadge.textContent = nodo.speaker || "Narrador";
+
+                // 2. Processa o texto com as tags particionadas
+                this.dialogText.innerHTML = processarTagsVisuais(nodo.text);
+
+                // 3. Verifica se este nó possui opções de escolha
+                if (nodo.choices && nodo.choices.length > 0) {
+                    this.mostrarEscolhas(nodo.choices);
+                } else {
+                    this.esconderEscolhas();
+                }
+            }
+
+            mostrarEscolhas(opcoes) {
+                this.aguardandoEscolha = true;
+                this.continueHint.style.display = "none";
+                this.choicesFrame.innerHTML = "";
+                this.choicesFrame.style.display = "flex";
+
+                // Cria cada botão de opção dentro do choices-frame (acima do dialog-frame)
+                opcoes.forEach(opc => {
+                    const btn = document.createElement("button");
+                    btn.className = "choice-btn";
+                    
+                    const speakerTag = opc.speaker ? `<span class="choice-speaker-tag">[${opc.speaker}]</span> ` : "";
+                    btn.innerHTML = `${speakerTag}${processarTagsVisuais(opc.text)}`;
+                    
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        this.selecionarEscolha(opc.target);
+                    };
+
+                    this.choicesFrame.appendChild(btn);
+                });
+            }
+
+            esconderEscolhas() {
+                this.aguardandoEscolha = false;
+                this.choicesFrame.style.display = "none";
+                this.choicesFrame.innerHTML = "";
+                this.continueHint.style.display = "flex";
+            }
+
+            selecionarEscolha(proximoId) {
+                this.esconderEscolhas();
+                this.carregarNodo(proximoId);
+            }
+
+            avancar() {
+                // Se o usuário precisa escolher uma opção, o clique no frame não avança
+                if (this.aguardandoEscolha) return;
+
+                const nodo = this.dialogos[this.nodoAtualId];
+                if (nodo && nodo.target) {
+                    this.carregarNodo(nodo.target);
+                } else {
+                    this.destruirDialogos();
+                }
+            }
+
+            /* Destrói o dialog_frame e deixa somente a cena main */
+            destruirDialogos() {
+                this.managerEl.style.animation = "fadeOut 0.4s forwards";
+                setTimeout(() => {
+                    this.managerEl.style.display = "none";
+                    this.endMessage.style.display = "block";
+                    this.restartBtn.style.display = "inline-block";
+                }, 400);
+            }
+        }
+
+        // Instância global do Gerenciador de Diálogos
+        let dialogManager;
+
+        function iniciarDialogos() {
+            dialogManager = new DialogManager(roteiroJogo);
+            dialogManager.iniciar();
+        }
+
+        // Inicia automaticamente ao carregar a página
+        window.onload = () => {
+            iniciarDialogos();
+        };
+
+        // Suporte a avançar com tecla de Espaço ou Enter
+        window.addEventListener("keydown", (e) => {
+            if (e.code === "Space" || e.code === "Enter") {
+                if (dialogManager && !dialogManager.aguardandoEscolha) {
+                    dialogManager.avancar();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
