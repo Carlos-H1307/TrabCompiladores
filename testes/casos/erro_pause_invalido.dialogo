@@ -1,0 +1,6 @@
+// espera: erro | tempo inválido
+phrase: 1
+---
+[Rato] Oi[pause=rapido/] tchau.
+<<stop>>
+===

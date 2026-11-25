@@ -1,0 +1,5 @@
+// espera: erro | bloco sem <<jump ID>> ou <<stop>>
+phrase: 1
+---
+[Rato] Oi.
+===

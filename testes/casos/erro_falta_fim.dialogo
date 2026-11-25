@@ -1,0 +1,5 @@
+// espera: erro | fim inesperado do arquivo
+phrase: 1
+---
+[Rato] A
+<<stop>>

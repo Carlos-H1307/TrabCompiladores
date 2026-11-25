@@ -1,0 +1,8 @@
+// espera: erro | não pode ter um <<jump>>/<<stop>> solto
+phrase: 1
+---
+[Rato] Oi.
+-> [Gato] Tchau.
+    <<stop>>
+<<jump 1>>
+===

@@ -1,0 +1,6 @@
+// espera: erro | tag desconhecida [piscar]
+phrase: 1
+---
+[Rato] [piscar]Oi[/piscar].
+<<stop>>
+===

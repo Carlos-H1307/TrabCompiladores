@@ -8,7 +8,7 @@
 //   Nina         - a beija flor veloz
 //
 // Efeitos usados: [shake] [bobbing] [b] [color=#hex] e [pause=ms/]
-// Observacao: tags de abertura devem vir coladas na palavra seguinte, sem espaco.
+// Observacao: o espaco entre uma tag e a palavra e mantido no XML como no roteiro.
 
 phrase: inicio
 ---

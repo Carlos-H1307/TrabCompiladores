@@ -16,12 +16,22 @@ trabalho/
 │   ├── lexer.py              # Análise léxica (tokens)
 │   ├── parser.py             # Análise sintática, semântica, geração do XML e servidor visual
 │   ├── roteiro.dialogo       # Roteiro de exemplo (entrada)
+│   ├── roteiro_passaros.dialogo  # Roteiro maior, usado nas árvores de derivação
 │   ├── saida_dialogos.xml    # XML gerado (saída)
+│   ├── prompt.md             # Prompt usado na ferramenta de IA
 │   └── modificacoes.md       # Registro das modificações implementadas
+├── docs/
+│   └── tabela_traducao.md    # Regras léxicas, produções, ações e regras semânticas
+├── testes/
+│   ├── casos/                # Roteiros válidos e inválidos com o resultado esperado
+│   └── rodar_testes.py       # Executa todos os casos
 ├── visual/
 │   └── index.html            # Interface web que lê o XML e executa os diálogos
-└── ply_modificado/           # Exemplo anterior (DSL do robô); não faz parte do compilador de diálogos
+├── arvore_concreta_passaros.png  # Árvore de derivação
+└── arvore_anotada_passaros_final_light.png  # Árvore de derivação anotada
 ```
+
+Nos fontes, cada regra está marcada como `[ORIGINAL PLY]`, `[MODIFICADO]` ou `[NOVO]` em relação ao exemplo calc do PLY.
 
 ## Requisitos
 
@@ -75,7 +85,13 @@ python parser.py roteiro.dialogo --jogar
 ### 4. Ver os tokens do analisador léxico
 
 ```powershell
-python lexer.py
+python lexer.py roteiro.dialogo
+```
+
+### 5. Rodar os testes (a partir da raiz do projeto)
+
+```powershell
+python testes/rodar_testes.py
 ```
 
 ### Abrindo o `index.html` direto (sem servidor)
@@ -98,16 +114,23 @@ phrase: 001                                   // início de um bloco (id do diá
 
 | Elemento | Sintaxe | Significado |
 |---|---|---|
-| Bloco | `phrase: ID` ... `---` ... `===` | Um diálogo identificado por `ID` |
+| Bloco | `phrase: ID` ... `---` ... `===` | Um diálogo identificado por `ID` (`dialog_node:` também é aceito) |
 | Falante | `[Nome] texto` | Quem fala; aparece sobre a caixa de diálogo |
 | Escolha | `-> [Falante] texto` + comando | Opção do jogador (falante é opcional) |
 | Salto | `<<jump ID>>` | Vai para o diálogo `ID` |
 | Fim | `<<stop>>` | Encerra a conversa |
 | Comentário | `// ...` | Ignorado pelo compilador |
-| Efeitos | `[shake]`, `[bobbing]`, `[b]`, `[color=#hex]` ... `[/tag]` | Efeitos visuais no texto |
+| Efeitos | `[shake]`, `[bobbing]`, `[b]`/`[bold]`, `[color=#hex]` ... `[/tag]` ou `[/]` | Efeitos visuais no texto |
 | Pausa | `<pause=500/>` | Pausa (ms) durante a digitação |
 
-Um bloco sem escolha termina com `<<jump ID>>` (segue para o próximo) ou `<<stop>>` (fim).
+Regras de cada bloco (verificadas pelo compilador):
+
+1. Começa com uma ou mais falas `[Personagem] texto`, todas do **mesmo** personagem.
+2. Termina com opções `-> [Personagem] texto` (cada uma com o seu `<<jump ID>>`/`<<stop>>`) **ou** com exatamente um `<<jump ID>>`/`<<stop>>`.
+3. As tags de efeito precisam ser conhecidas e estar balanceadas: `[a][b]...[/b][/a]`.
+4. Todo `jump` aponta para um `phrase` existente, e os IDs não se repetem.
+
+O `[Personagem]` só é reconhecido no início da linha (ou logo após `->`). No meio da frase, `[nome]` é uma tag de efeito.
 
 ## Saída gerada (`saida_dialogos.xml`)
 
@@ -131,8 +154,12 @@ Um bloco sem escolha termina com `<<jump ID>>` (segue para o próximo) ou `<<sto
 | Mensagem | Causa / solução |
 |---|---|
 | `pip`/`python` não reconhecido | Python fora do `PATH`. Reabra o terminal ou use o caminho completo do executável. |
-| `Erro Sintático próximo ao token ...` | Bloco mal formado (falta `---`, `===` ou comando após a escolha). |
-| `[Erro Semântico] ... destino inexistente` | Um `jump` ou escolha aponta para um `phrase` que não existe. |
+| `[Erro Léxico] ... caractere inválido` | `<`, `>` ou colchete sem par no texto. |
+| `[Erro Sintático] ... token inesperado` | Bloco mal formado (falta `---`, `===` ou comando após a escolha). |
+| `[Erro Semântico] ... bloco sem <<jump ID>> ou <<stop>>` | Toda fala precisa indicar o próximo passo. |
+| `[Erro Semântico] ... fala de 'X' dentro de um bloco de 'Y'` | Um bloco tem um único personagem; use outro `phrase`. |
+| `[Erro Semântico] ... tag desconhecida / não foi fechada / tags cruzadas` | Confira os efeitos `[tag]...[/tag]`. |
+| `[Erro Semântico] ... que não existe` | Um `jump` ou escolha aponta para um `phrase` que não existe. |
 | `Não consegui ler o XML do compilador` | Abra via `--visual` ou use **Carregar XML...**. |
 | `Port already in use` | Outro servidor usa a porta 8000; encerre-o e rode de novo. |
 

@@ -1,0 +1,6 @@
+// espera: erro | cor inválida
+phrase: 1
+---
+[Rato] [color=#zz]Oi[/color].
+<<stop>>
+===

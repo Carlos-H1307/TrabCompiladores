@@ -1,0 +1,6 @@
+// espera: erro | tag desconhecida [gato]
+phrase: 1
+---
+[Rato] Oi [Gato] tudo bem?
+<<stop>>
+===

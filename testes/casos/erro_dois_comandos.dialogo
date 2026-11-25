@@ -1,0 +1,7 @@
+// espera: erro | mais de um comando de fluxo
+phrase: 1
+---
+[Rato] Oi.
+<<jump 1>>
+<<stop>>
+===

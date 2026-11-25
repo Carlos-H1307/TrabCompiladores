@@ -1,0 +1,6 @@
+// espera: erro | está no lugar do identificador do personagem
+phrase: 1
+---
+[shake]Oi.[/shake]
+<<stop>>
+===

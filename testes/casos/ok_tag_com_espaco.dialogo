@@ -1,0 +1,6 @@
+// espera: ok | Eu vi um <b> Gato </b> grande.
+phrase: 1
+---
+[Rato] Eu vi um [b] Gato [/b] grande.
+<<stop>>
+===

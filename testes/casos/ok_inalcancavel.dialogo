@@ -1,0 +1,11 @@
+// espera: ok aviso | A
+phrase: 1
+---
+[Rato] A
+<<stop>>
+===
+phrase: 2
+---
+[Rato] B
+<<stop>>
+===

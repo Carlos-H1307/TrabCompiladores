@@ -1,0 +1,6 @@
+// espera: erro | caractere inválido '<'
+phrase: 1
+---
+[Rato] 3 < 4.
+<<stop>>
+===

@@ -1,0 +1,6 @@
+// espera: erro | bloco sem fala de personagem
+phrase: 1
+---
+-> [Gato] Oi.
+    <<stop>>
+===

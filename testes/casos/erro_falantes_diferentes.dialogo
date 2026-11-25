@@ -1,0 +1,7 @@
+// espera: erro | dentro de um bloco de
+phrase: 1
+---
+[Rato] Oi.
+[Gato] Olá.
+<<stop>>
+===

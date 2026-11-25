@@ -1,0 +1,7 @@
+// espera: erro | não tem o identificador do personagem
+phrase: 1
+---
+[Rato] A
+-> Não.
+    <<stop>>
+===

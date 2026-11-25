@@ -1,0 +1,48 @@
+// espera: ok | Ei, Cachorro... Está procurando <shake><color=#d6d6d6>algo</color></shake>?
+dialog_node: 001
+---
+[Rato] Ei, Cachorro... Está procurando [shake][color=#d6d6d6]algo[/color][/shake]?
+-> [Cachorro] Sim, sim. Minha [color=#f00]Pochete[/color].
+    <<jump 002>>
+-> [Cachorro] Por enquanto, não.
+    <<stop>>
+===
+
+dialog_node: 002
+---
+[Rato] Um Cachorro? De Pochete?
+<<jump 003>>
+===
+
+dialog_node: 003
+---
+[Rato] Estranho.
+<<jump 004>>
+===
+
+dialog_node: 004
+---
+[Rato] Enfim...
+<<jump 005>>
+===
+
+dialog_node: 005
+---
+[Rato] Eu vi um [bold]Gato [shake]suspeito[/shake][/bold] passando com algo bem de baixo do [color=#10c8e0]SUVACO[/color], agorinha pouco.
+<<jump 006>>
+===
+
+dialog_node: 006
+---
+[Rato] Ele desceu. Acho que pode estar com o que você procura.
+-> [Cachorro] Humm... Vou dar uma olhada. Valeu, Rato!
+    <<jump 007>>
+===
+
+dialog_node: 007
+---
+[Rato] De nada.
+<<stop>>
+===
+
+

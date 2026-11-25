@@ -1,0 +1,6 @@
+// espera: ok | Seja bem-vindo! 2 + 2 = 4. Atenção: Stop! Jump e/ou phrase.
+phrase: 1
+---
+[Rato] Seja bem-vindo! 2 + 2 = 4. Atenção: Stop! Jump e/ou phrase.
+<<stop>>
+===

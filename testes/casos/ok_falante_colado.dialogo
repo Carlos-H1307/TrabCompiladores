@@ -1,0 +1,6 @@
+// espera: ok | Oi.
+phrase: 1
+---
+[Rato]Oi.
+<<stop>>
+===

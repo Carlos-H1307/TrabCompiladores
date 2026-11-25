@@ -1,0 +1,8 @@
+// espera: erro | fala depois de uma opção
+phrase: 1
+---
+[Rato] Oi.
+-> [Gato] Tchau.
+    <<stop>>
+[Rato] Espera!
+===

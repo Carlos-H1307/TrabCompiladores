@@ -1,0 +1,6 @@
+// espera: erro | tags cruzadas
+phrase: 1
+---
+[Rato] [shake]Oi [color=#f00]x[/shake][/color].
+<<stop>>
+===

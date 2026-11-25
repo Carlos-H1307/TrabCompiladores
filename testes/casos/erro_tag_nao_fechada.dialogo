@@ -1,0 +1,6 @@
+// espera: erro | foi aberta e não foi fechada
+phrase: 1
+---
+[Rato] [shake]Oi.
+<<stop>>
+===

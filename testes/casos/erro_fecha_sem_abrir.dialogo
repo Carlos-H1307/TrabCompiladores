@@ -1,0 +1,6 @@
+// espera: erro | fecha uma tag que não foi aberta
+phrase: 1
+---
+[Rato] Oi[/b].
+<<stop>>
+===

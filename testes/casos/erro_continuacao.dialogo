@@ -1,0 +1,7 @@
+// espera: erro | frase sem o identificador do personagem
+phrase: 1
+---
+[Rato] A
+segunda linha.
+<<stop>>
+===

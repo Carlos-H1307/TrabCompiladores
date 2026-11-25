@@ -1,0 +1,6 @@
+// espera: ok | <shake>Oi <color=#0f0>verde</color></shake>!
+phrase: 1
+---
+[Rato] [shake]Oi [color=#0f0]verde[/][/]!
+<<stop>>
+===

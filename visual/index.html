@@ -410,7 +410,7 @@
         function estiloAtual(pilha) {
             const e = { bold: false, shake: false, bobbing: false, cor: null };
             for (const t of pilha) {
-                if (t.nome === "b" || t.nome === "strong") e.bold = true;
+                if (t.nome === "b" || t.nome === "bold" || t.nome === "strong") e.bold = true;
                 else if (t.nome === "shake") e.shake = true;
                 else if (t.nome === "bobbing" || t.nome === "wave") e.bobbing = true;
                 else if (t.nome === "color" && t.valor) e.cor = t.valor;

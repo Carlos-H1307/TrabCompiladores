@@ -1,0 +1,6 @@
+// espera: erro | que não existe
+phrase: 1
+---
+[Rato] A
+<<jump 9>>
+===

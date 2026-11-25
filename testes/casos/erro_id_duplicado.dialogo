@@ -1,0 +1,11 @@
+// espera: erro | já foi definida na linha 2
+phrase: 1
+---
+[Rato] A
+<<jump 1>>
+===
+phrase: 1
+---
+[Rato] B
+<<stop>>
+===
