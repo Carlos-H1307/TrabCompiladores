@@ -1,113 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <conversation>
-	<dialog id="inicio" speaker="Pipo">
-		<text>Pio pio pio! &lt;shake&gt;Plumo, Plumo, uma tragédia!&lt;/shake&gt;
-A &lt;color=#ffd700&gt;Pena Dourada&lt;/color&gt; do Festival do Vento &lt;b&gt;sumiu&lt;/b&gt; do ninho!</text>
+	<dialog id="001" speaker="Rato">
+		<text>Ei, Cachorro... Está procurando &lt;shake&gt;&lt;color=#d6d6d6&gt;algo&lt;/color&gt;&lt;/shake&gt;?</text>
 		<choices>
-			<choice target="pipo_conta" speaker="Plumo">
-				<text>Calma, Pipo. Conte tudo desde o começo.</text>
+			<choice target="002" speaker="Cachorro">
+				<text>Sim, sim. Minha &lt;shake&gt;&lt;color=#f00&gt;Pochete&lt;/color&gt;&lt;/shake&gt;.</text>
 			</choice>
-			<choice target="recusa" speaker="Plumo">
-				<text>Eu não tenho tempo para isso agora.</text>
+			<choice target="exit" speaker="Cachorro">
+				<text>Por enquanto, não.</text>
 			</choice>
 		</choices>
 	</dialog>
-	<dialog id="recusa" speaker="Pipo">
-		<text>&lt;shake&gt;Mas sem a Pena Dourada o vento não vai soprar!&lt;/shake&gt;
-Sem vento, nenhum pássaro consegue voar... &lt;pause=700/&gt;Por favor, Plumo.</text>
+	<dialog id="002" speaker="Rato" target="003">
+		<text>Um Cachorro? De Pochete?</text>
+	</dialog>
+	<dialog id="003" speaker="Rato" target="004">
+		<text>Estranho.</text>
+	</dialog>
+	<dialog id="004" speaker="Rato" target="005">
+		<text>Enfim...</text>
+	</dialog>
+	<dialog id="005" speaker="Rato">
+		<text>Eu vi um &lt;b&gt;Gato &lt;bobbing&gt;suspeito&lt;/bobbing&gt;&lt;/b&gt; passando com algo bem de baixo do &lt;color=#10c8e0&gt;SUBACO&lt;/color&gt;, agorinha pouco.
+Ele desceu. Acho que pode estar com o que você procura.</text>
 		<choices>
-			<choice target="pipo_conta" speaker="Plumo">
-				<text>Está bem, eu ajudo.</text>
-			</choice>
-			<choice target="final_egoista" speaker="Plumo">
-				<text>Procure outra ave.</text>
+			<choice target="006" speaker="Dogpoch">
+				<text>Humm... Vou dar uma olhada. Valeu, Rato!</text>
 			</choice>
 		</choices>
 	</dialog>
-	<dialog id="pipo_conta" speaker="Pipo" target="pistas">
-		<text>Eu estava dormindo quando ouvi um &lt;bobbing&gt;ssssshhh&lt;/bobbing&gt; vindo da árvore velha.
-&lt;pause=700/&gt;Quando acordei, só restava uma &lt;color=#999999&gt;sombra&lt;/color&gt; no galho. Corra até a Dona Jandira, ela vê tudo!</text>
-	</dialog>
-	<dialog id="pistas" speaker="Dona Jandira">
-		<text>Hou hou... &lt;pause=600/&gt;Eu vi tudo, filhote.
-Sou a &lt;b&gt;Dona Jandira&lt;/b&gt;, guardiã das noites, e meus olhos &lt;color=#f5d742&gt;brilham&lt;/color&gt; no escuro.</text>
-		<choices>
-			<choice target="suspeito" speaker="Plumo">
-				<text>Quem levou a Pena Dourada?</text>
-			</choice>
-			<choice target="caminho" speaker="Plumo">
-				<text>Pode me mostrar o caminho?</text>
-			</choice>
-		</choices>
-	</dialog>
-	<dialog id="suspeito" speaker="Dona Jandira" target="tico">
-		<text>Foi alguém &lt;bobbing&gt;muito&lt;/bobbing&gt; colorido e &lt;b&gt;muito&lt;/b&gt; barulhento.
-Um certo &lt;color=#ff7a00&gt;Tico&lt;/color&gt;, o tucano exibido, que vive dizendo que tem o &lt;shake&gt;maior bico&lt;/shake&gt; do bosque.</text>
-	</dialog>
-	<dialog id="caminho" speaker="Dona Jandira" target="tico">
-		<text>Siga o riacho até a figueira gigante. &lt;pause=500/&gt;Mas cuidado, o caminho é &lt;shake&gt;escorregadio&lt;/shake&gt;!
-Lá você vai encontrar o ladrão da pena.</text>
-	</dialog>
-	<dialog id="tico" speaker="Tico">
-		<text>Ah ah ah! &lt;b&gt;QUEM OUSA&lt;/b&gt; me procurar?
-Eu sou o &lt;color=#ff7a00&gt;Grande Tico&lt;/color&gt;, o bico mais &lt;bobbing&gt;lindo&lt;/bobbing&gt; do bosque!</text>
-		<choices>
-			<choice target="tico_nega" speaker="Plumo">
-				<text>Devolva a Pena Dourada, Tico.</text>
-			</choice>
-			<choice target="tico_vaidoso" speaker="Plumo">
-				<text>Que bico lindo... Posso ver de perto?</text>
-			</choice>
-		</choices>
-	</dialog>
-	<dialog id="tico_nega" speaker="Tico">
-		<text>&lt;shake&gt;Nunca!&lt;/shake&gt; A pena combina perfeitamente com o meu &lt;color=#ff7a00&gt;bico laranja&lt;/color&gt;!</text>
-		<choices>
-			<choice target="tico_assusta" speaker="Plumo">
-				<text>Sem ela o vento não sopra, e você não vai poder voar!</text>
-			</choice>
-			<choice target="briga" speaker="Plumo">
-				<text>Então eu mesmo a tomo de você!</text>
-			</choice>
-		</choices>
-	</dialog>
-	<dialog id="tico_vaidoso" speaker="Tico" target="nina">
-		<text>&lt;bobbing&gt;Haha!&lt;/bobbing&gt; Finalmente alguém com bom gosto!
-Olhe bem, é o bico mais &lt;color=#ff7a00&gt;radiante&lt;/color&gt; de todos. &lt;pause=500/&gt;Vou admirar o meu reflexo no riacho.</text>
-	</dialog>
-	<dialog id="nina" speaker="Nina">
-		<text>&lt;b&gt;Zum zum!&lt;/b&gt; Enquanto o Tico se admira no riacho, eu &lt;bobbing&gt;voo&lt;/bobbing&gt; rapidinho até o galho dele.
-Quer que eu pegue a &lt;color=#ffd700&gt;Pena Dourada&lt;/color&gt; sem ele perceber?</text>
-		<choices>
-			<choice target="final_astucia" speaker="Plumo">
-				<text>Rápido, Nina, pegue a pena!</text>
-			</choice>
-			<choice target="tico_nega" speaker="Plumo">
-				<text>Não, vou tentar convencer o Tico.</text>
-			</choice>
-		</choices>
-	</dialog>
-	<dialog id="tico_assusta" speaker="Tico" target="final_bom">
-		<text>&lt;pause=600/&gt;Como assim... &lt;shake&gt;sem voar?&lt;/shake&gt;
-Eu &lt;b&gt;preciso&lt;/b&gt; voar para exibir o meu bico lá do alto! Está bem, está bem... leve a pena.</text>
-	</dialog>
-	<dialog id="briga" speaker="Tico" target="final_briga">
-		<text>&lt;shake&gt;Então venha!&lt;/shake&gt; &lt;pause=800/&gt;Ai! Ai! &lt;b&gt;Meu bico!&lt;/b&gt;
-Eu me rendo, eu me rendo! Leve essa &lt;color=#ffd700&gt;pena&lt;/color&gt; chata!</text>
-	</dialog>
-	<dialog id="final_bom" speaker="Pipo" target="exit">
-		<text>&lt;bobbing&gt;Piooo!&lt;/bobbing&gt; Você conseguiu, Plumo!
-A &lt;color=#ffd700&gt;Pena Dourada&lt;/color&gt; brilha de novo e o vento já está &lt;b&gt;soprando&lt;/b&gt;! Que o festival comece!</text>
-	</dialog>
-	<dialog id="final_astucia" speaker="Nina" target="exit">
-		<text>Zum zum! Missão cumprida! &lt;pause=500/&gt;O Tico nem percebeu que a &lt;color=#ffd700&gt;Pena Dourada&lt;/color&gt; sumiu do galho dele.
-&lt;bobbing&gt;Esperteza voa mais alto que força!&lt;/bobbing&gt;</text>
-	</dialog>
-	<dialog id="final_briga" speaker="Dona Jandira" target="exit">
-		<text>Hou hou... Força demais, bondade de menos. &lt;pause=600/&gt;A pena voltou, mas o bico do Tico vai &lt;shake&gt;doer&lt;/shake&gt; por semanas.</text>
-	</dialog>
-	<dialog id="final_egoista" speaker="Pipo" target="exit">
-		<text>&lt;pause=800/&gt;Entendo... &lt;color=#666666&gt;Então eu procuro sozinho.&lt;/color&gt;
-Pio... &lt;pause=600/&gt;pio... &lt;shake&gt;E o vento nunca mais soprou.&lt;/shake&gt;</text>
+	<dialog id="006" speaker="Rato" target="exit">
+		<text>De nada.</text>
 	</dialog>
 </conversation>

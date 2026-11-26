@@ -1,5 +1,10 @@
 # DialogueDSL – Compilador de Diálogos para Jogos
 
+## Integrantes
+- Carlos Henrique de Oliveira Pereira
+- Henrique Ribeiro Saldanha de Menezes Rodrigues
+- Daniel Domingo Quintanilha
+
 Trabalho de Compiladores (2026/2). Um compilador, feito com **PLY (Python Lex-Yacc)**, que lê roteiros de diálogo em uma linguagem própria (inspirada no Yarn Spinner), valida o fluxo e gera um **XML**. Uma interface web lê esse XML em tempo de execução e roda o diálogo como em um jogo.
 
 ```

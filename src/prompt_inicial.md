@@ -49,7 +49,7 @@ Com base neste exemplo, atualize o modifique os arquivos lexer.py e parser.py.
 
 O arquivo começa com o comando "dialog_node: <numero>". Este número representa o ID da fala do personagem. Cada frase contém um ID único, porque após uma fala pode haver uma resposta encaminhando, a partir do ID, a um outro dialo_node. O que está entre --- e === compõe um único dialog_node. Dentro do dialog_node há, necessariamente, uma frase do personagem que está falando. Após, pode haver opções que divergem o caminho do diálogo.
 
-O dialog_node deve ter, obrigatoriamente uma frase que é composta por um identificador com o nome do personagem que está falando, depois um texto. Necessariamente nesta ordem. Essa estrutura de Personagem + Frase também compõem uma option.
+O dialog_node deve ter, obrigatoriamente, uma frase, que é composta por um identificador com o nome do personagem que está falando, depois, um texto, necessariamente nesta ordem. Essa estrutura de Personagem + Frase também compõem uma option.
 
 Cada frase deve ser seguida, obrigatoriamente, de um "<<jump x>>" ou "<<stop>>" para indicar o próximo passo. Enquanto "<<jump x>>" mostra para qual dialog_node o diálogo deve seguir, "<<stop>>" encerra o diálogo.
 
